@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "tsup src/cli.ts --format cjs --minify --out-dir dist --no-splitting",
-    "package": "powershell -ExecutionPolicy Bypass -File tools/build-sea.ps1",
+    "package": "pkg dist/cli.js --targets node20-win-x64 --output bin/cloudsqlctl.exe",
+    "zip": "powershell -Command \"Get-ChildItem -Path src, tests, tools, package.json, tsconfig.json, tsup.config.ts, jest.config.ts, .gitignore, eslint.config.mjs, LICENSE, *.md -ErrorAction SilentlyContinue | Compress-Archive -DestinationPath cloudsqlctl.zip -Force\"",
     "lint": "eslint src",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
     "prepare": "husky install"

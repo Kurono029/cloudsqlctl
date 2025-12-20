@@ -1,7 +1,11 @@
-import { listInstances } from '../src/core/gcloud.js';
-import { execa } from 'execa';
+import { jest } from '@jest/globals';
 
-jest.mock('execa');
+jest.unstable_mockModule('execa', () => ({
+    execa: jest.fn()
+}));
+
+const { listInstances } = await import('../src/core/gcloud.js');
+const { execa } = await import('execa');
 
 describe('Gcloud Module', () => {
     it('should list instances', async () => {

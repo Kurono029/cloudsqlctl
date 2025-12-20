@@ -1,6 +1,10 @@
 import { Command } from 'commander';
 import { logger } from '../core/logger.js';
 import { checkGcloudInstalled, getActiveAccount } from '../core/gcloud.js';
+import { checkEnvironment } from '../system/env.js';
+import { isServiceInstalled } from '../system/service.js';
+import { SYSTEM_PATHS } from '../system/paths.js';
+import fs from 'fs-extra';
 import axios from 'axios';
 
 export const doctorCommand = new Command('doctor')
@@ -22,6 +26,28 @@ export const doctorCommand = new Command('doctor')
             logger.info(`✅ Authenticated as: ${account}`);
         } else {
             logger.warn('⚠️ No active gcloud account found. Run "gcloud auth login"');
+        }
+
+        // Check Environment Variables
+        const envOk = await checkEnvironment();
+        if (envOk) {
+            logger.info('✅ System Environment Variables are correct');
+        } else {
+            logger.warn('⚠️ System Environment Variables are missing or incorrect');
+        }
+
+        // Check Proxy Binary
+        if (await fs.pathExists(SYSTEM_PATHS.PROXY_EXE)) {
+            logger.info('✅ Cloud SQL Proxy binary found');
+        } else {
+            logger.error('❌ Cloud SQL Proxy binary NOT found');
+        }
+
+        // Check Service
+        if (await isServiceInstalled()) {
+            logger.info('✅ Windows Service is installed');
+        } else {
+            logger.info('ℹ️ Windows Service is NOT installed (Optional)');
         }
 
         // Check Network (GitHub API)
