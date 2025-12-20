@@ -40,7 +40,6 @@ export async function downloadProxy(version: string) {
         const releaseUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${version}`;
         const response = await axios.get(releaseUrl);
         const assets = response.data.assets;
-        logger.info(`Found ${assets.length} assets: ${assets.map((a: any) => a.name).join(', ')}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const asset = assets.find((a: any) => a.name === ASSET_NAME);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,11 +92,19 @@ export async function downloadProxy(version: string) {
             }
             logger.info('Checksum verified successfully');
         } catch (error) {
-            logger.warn('Checksum verification skipped or failed: ' + error);
-            // Decide if we want to fail hard or warn. For security, failing hard is better if checksum was expected.
-            // But if checksum file is missing, maybe warn.
-            // Given requirements "Secure", let's fail if we found a checksum url but it failed.
-            if (checksumUrl) throw error;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                logger.warn('Checksum file not found, skipping verification.');
+            } else {
+                logger.warn('Checksum verification failed: ' + error);
+                // If it was a verification failure (not 404), we should probably fail.
+                // But if it was a network error fetching the checksum, maybe we should also fail?
+                // For now, if we have a checksum URL and it fails to verify (mismatch), we threw Error above.
+                // If axios failed with other than 404, we rethrow.
+                if (!(axios.isAxiosError(error) && error.response?.status === 404)) {
+                    throw error;
+                }
+            }
         }
     }
 
