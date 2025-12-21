@@ -33,7 +33,11 @@ export const selectCommand = new Command('select')
             await writeConfig({ selectedInstance });
             logger.info(`Selected instance: ${selectedInstance}`);
         } catch (error) {
-            logger.error('Failed to select instance', error);
+            if (error instanceof Error && error.message.includes('Authentication required')) {
+                logger.error(error.message);
+            } else {
+                logger.error('Failed to select instance', error);
+            }
             process.exit(1);
         }
     });

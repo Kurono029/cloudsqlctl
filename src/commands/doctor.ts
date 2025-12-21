@@ -41,8 +41,12 @@ export const doctorCommand = new Command('doctor')
         try {
             await listInstances();
             logger.info('✅ Network/Permissions OK (Can list instances)');
-        } catch {
-            logger.error('❌ Network/Permissions Check Failed (Cannot list instances)');
+        } catch (error) {
+            if (error instanceof Error && error.message.includes('Authentication required')) {
+                logger.error('❌ Network/Permissions Check Failed: Authentication required');
+            } else {
+                logger.error('❌ Network/Permissions Check Failed (Cannot list instances)');
+            }
         }
 
         // Check Environment Variables

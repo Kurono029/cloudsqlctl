@@ -28,7 +28,11 @@ export const listCommand = new Command('list')
             })));
 
         } catch (error) {
-            logger.error('Failed to list instances', error);
+            if (error instanceof Error && error.message.includes('Authentication required')) {
+                logger.error(error.message);
+            } else {
+                logger.error('Failed to list instances', error);
+            }
             process.exit(1);
         }
     });

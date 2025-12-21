@@ -11,6 +11,16 @@ export interface GcloudInstance {
     state: string;
 }
 
+function isAuthError(error: unknown): boolean {
+    const err = error as { stderr?: string };
+    if (!err?.stderr) return false;
+    const { stderr } = err;
+    return stderr.includes('Reauthentication failed') ||
+        stderr.includes('gcloud auth login') ||
+        stderr.includes('RefreshError') ||
+        stderr.includes('cannot prompt during non-interactive execution');
+}
+
 async function getGcloudCommand(): Promise<string> {
     const config = await readConfig();
     return config.gcloudPath || 'gcloud';
@@ -22,6 +32,9 @@ export async function listInstances(): Promise<GcloudInstance[]> {
         const { stdout } = await execa(cmd, ['sql', 'instances', 'list', '--format=json']);
         return JSON.parse(stdout);
     } catch (error) {
+        if (isAuthError(error)) {
+            throw new Error('Authentication required. Please run "cloudsqlctl auth login".');
+        }
         logger.error('Failed to list instances', error);
         throw error;
     }

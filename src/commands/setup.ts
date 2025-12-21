@@ -122,6 +122,10 @@ export const setupCommand = new Command('setup')
             logger.info('Setup complete! You can now run "cloudsqlctl start" to start the proxy.');
 
         } catch (error) {
-            logger.error('Failed to list instances. Ensure you have permissions.', error);
+            if (error instanceof Error && error.message.includes('Authentication required')) {
+                logger.error(error.message);
+            } else {
+                logger.error('Failed to list instances. Ensure you have permissions.', error);
+            }
         }
     });
