@@ -90,21 +90,26 @@ Run the proxy as a Windows Service for background persistence.
 # Install service (Admin required)
 cloudsqlctl service install --instance "my-project:region:instance" --port 5432
 
+# Configure startup type (Automatic, Manual, Disabled, Delayed)
+cloudsqlctl service startup Automatic
+
 # Start service
 cloudsqlctl service start
 
-# 2. Select your database instance
-cloudsqlctl select
+# Check status
+cloudsqlctl service status
+```
 
-# Or list and connect directly
-cloudsqlctl list
-cloudsqlctl connect project:region:instance
+### Interactive Authentication
 
-# 3. Start the proxy (if using select)
-cloudsqlctl start
+Manage Service Account keys interactively:
 
-# 4. Check status
-cloudsqlctl status
+```powershell
+# List installed keys
+cloudsqlctl auth list-keys
+
+# Interactively select a key to use
+cloudsqlctl auth select-key
 ```
 
 ## Configuration

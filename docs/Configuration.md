@@ -34,6 +34,10 @@ cloudsqlctl auth login
 
 # Set up Application Default Credentials (ADC) - Required for the proxy
 cloudsqlctl auth adc
+
+# Manage Service Account keys
+cloudsqlctl auth list-keys
+cloudsqlctl auth select-key
 ```
 
 ### 2. Select an Instance
@@ -70,7 +74,10 @@ For production or long-running background tasks, you can install the proxy as a 
 
 ```powershell
 # Install the service
-cloudsqlctl service install
+cloudsqlctl service install --instance "project:region:instance"
+
+# Configure startup type (Automatic, Manual, Disabled, Delayed)
+cloudsqlctl service startup Automatic
 
 # Start the service
 cloudsqlctl service start

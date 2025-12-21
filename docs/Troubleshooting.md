@@ -73,6 +73,22 @@ Or manually: `gcloud auth application-default login`
    cloudsqlctl start --foreground
    ```
 
+### Service fails to start (Error 1053)
+
+**Cause**: Usually due to missing credentials or incorrect binary path.
+
+**Solution**:
+
+1. Ensure you have set a Service Account key with `--scope Machine`:
+   ```powershell
+   cloudsqlctl auth set-service-account --file <path> --scope Machine
+   ```
+2. Check the Windows Event Viewer (System logs) for specific service errors.
+3. Verify the service configuration:
+   ```powershell
+   cloudsqlctl service status
+   ```
+
 ## Resetting Configuration
 
 If your configuration is corrupted, you can reset the tool to its default state:

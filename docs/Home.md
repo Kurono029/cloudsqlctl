@@ -8,7 +8,7 @@
 - **Authentication Management**: Built-in `auth` command for gcloud login, ADC setup, and Service Account management.
 - **Automated Installation**: Downloads and verifies the official Cloud SQL Proxy binary.
 - **Instance Management**: Lists and selects Cloud SQL instances using your active `gcloud` configuration.
-- **Process Management**: Starts, stops, and restarts the proxy as a background process or Windows Service.
+- **Process Management**: Starts, stops, and restarts the proxy as a background process or Windows Service (with configurable startup types).
 - **Structured Logging**: JSON logging with automatic masking of sensitive tokens.
 - **Diagnostics**: Built-in `doctor` command to check environment health (gcloud, ADC, network, service).
 - **Self-Update**: Easily update the proxy binary to the latest version.
