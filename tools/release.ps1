@@ -168,12 +168,56 @@ if ($PSCmdlet.ShouldProcess("package.json/package-lock.json", "npm version $Vers
 
 # --- Changelog ---
 if (Test-Path "CHANGELOG.md") {
-    Write-Step "Prepending CHANGELOG.md entry"
+    Write-Step "Generating CHANGELOG.md entry from git history"
     $date = Get-Date -Format "yyyy-MM-dd"
+    
+    # Try to find the previous tag
+    $prevTag = (& git describe --tags --abbrev=0 2>$null)
+    $logRange = if ($prevTag) { "$prevTag..HEAD" } else { "HEAD" }
+    
+    # Get commits since last tag
+    $logs = (& git log $logRange --pretty=format:"%s" --no-merges)
+    
+    $added = @()
+    $changed = @()
+    $fixed = @()
+    
+    foreach ($line in $logs) {
+        if ($line -match '^(feat|add)(\(.*\))?:\s*(.*)$') {
+            $added += "- $($Matches[3])"
+        }
+        elseif ($line -match '^(fix|bug)(\(.*\))?:\s*(.*)$') {
+            $fixed += "- $($Matches[3])"
+        }
+        elseif ($line -match '^(chore|refactor|docs|style|perf|test|change)(\(.*\))?:\s*(.*)$') {
+            $changed += "- $($Matches[3])"
+        }
+        else {
+            # Default to changed if no prefix matches
+            $changed += "- $line"
+        }
+    }
+
+    $entry = "<!-- markdownlint-disable MD024 -->`n`n# Changelog`n`n## [$Version] - $date`n`n"
+    
+    if ($added.Count -gt 0) {
+        $entry += "### Added`n`n" + ($added -join "`n") + "`n`n"
+    }
+    if ($changed.Count -gt 0) {
+        $entry += "### Changed`n`n" + ($changed -join "`n") + "`n`n"
+    }
+    if ($fixed.Count -gt 0) {
+        $entry += "### Fixed`n`n" + ($fixed -join "`n") + "`n`n"
+    }
+    
+    if ($added.Count -eq 0 -and $changed.Count -eq 0 -and $fixed.Count -eq 0) {
+        $entry += "### Added`n`n- Release $Version`n`n"
+    }
+
     $existing = Get-Content "CHANGELOG.md" -Raw
     $existing = $existing -replace '(?ms)^<!-- markdownlint-disable MD024 -->\s*', ''
     $existing = $existing -replace '(?ms)^# Changelog\s*', ''
-    $entry = "<!-- markdownlint-disable MD024 -->`n`n# Changelog`n`n## [$Version] - $date`n`n### Added`n- Release $Version`n`n"
+    
     $escapedVer = [regex]::Escape($Version)
     if ($existing -notmatch "## \[$escapedVer\]") {
         Set-Content "CHANGELOG.md" ($entry + $existing) -Encoding UTF8

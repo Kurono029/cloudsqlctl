@@ -62,7 +62,7 @@ async function generateDocs() {
   for (const cmd of commands) {
     console.log(`Processing ${cmd}...`);
     content += `### ${cmd}\n\n`;
-    content += '```\n' + (await runCli([cmd, '--help'])) + '\n```\n\n';
+    content += '```text\n' + (await runCli([cmd, '--help'])) + '\n```\n\n';
   }
 
   await fs.writeFile(DOCS_FILE, content);
