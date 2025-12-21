@@ -20,6 +20,10 @@ export async function isServiceRunning(): Promise<boolean> {
     }
 }
 
+function buildServiceBinPath(proxyExe: string, instance: string, port: number, extraArgs: string[]): string {
+    return `"${proxyExe}" ${instance} --port=${port} ${extraArgs.join(' ')}`.trim();
+}
+
 export async function installService(instance: string, port: number = 5432, extraArgs: string[] = []) {
     if (!await isAdmin()) {
         throw new Error('Admin privileges required to install service.');
@@ -32,10 +36,9 @@ export async function installService(instance: string, port: number = 5432, extr
 
     logger.info(`Installing service ${SERVICE_NAME}...`);
 
-    const binPath = `\\"${SYSTEM_PATHS.PROXY_EXE}\\" ${instance} --port=${port} ${extraArgs.join(' ')}`;
+    const binPath = buildServiceBinPath(SYSTEM_PATHS.PROXY_EXE, instance, port, extraArgs);
 
-    // Use sc.exe for better control over binPath with spaces/quotes
-    // New-Service can be tricky with complex quoting
+    // Use New-Service with single-quoted BinaryPathName
     await runPs(`New-Service -Name "${SERVICE_NAME}" -BinaryPathName '${binPath}' -StartupType Automatic`);
 }
 
@@ -44,12 +47,10 @@ export async function updateServiceBinPath(instance: string, port: number = 5432
         throw new Error('Admin privileges required to update service configuration.');
     }
 
-    const binPath = `\\"${SYSTEM_PATHS.PROXY_EXE}\\" ${instance} --port=${port} ${extraArgs.join(' ')}`;
+    const binPath = buildServiceBinPath(SYSTEM_PATHS.PROXY_EXE, instance, port, extraArgs);
 
-    // Use sc.exe to config binPath as Set-Service doesn't always support it easily for args
-    // sc.exe config "cloudsql-proxy" binPath= "..."
-    // Note: sc.exe requires a space after binPath=
-    await runPs(`sc.exe config "${SERVICE_NAME}" binPath= "${binPath}"`);
+    // Use CIM/WMI to update service path
+    await runPs(`$svc = Get-CimInstance Win32_Service -Filter "Name='${SERVICE_NAME}'"; Invoke-CimMethod -InputObject $svc -MethodName Change -Arguments @{ PathName = '${binPath}' }`);
 }
 
 export async function uninstallService() {
@@ -63,9 +64,9 @@ export async function uninstallService() {
 
     logger.info(`Uninstalling service ${SERVICE_NAME}...`);
     await stopService();
-    // Remove-Service is available in PowerShell 6+, or use sc.exe
-    // PowerShell 5.1 (default on Win10) might not have Remove-Service? It does.
-    await runPs(`Remove-Service -Name "${SERVICE_NAME}"`);
+
+    // Use sc.exe delete instead of Remove-Service for better compatibility
+    await runPs(`sc.exe delete "${SERVICE_NAME}"`);
 }
 
 export async function startService() {

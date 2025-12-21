@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { PATHS } from './paths.js';
-import { checkEnvironment, setupEnvironment } from './env.js';
+import { checkEnvironmentDetailed, setupEnvironment } from './env.js';
 import { isServiceInstalled, installService } from './service.js';
 import { getLatestVersion, downloadProxy } from '../core/updater.js';
 import { generateScripts } from './ps1.js';
@@ -15,9 +15,11 @@ export async function selfHeal() {
     const scope = admin ? 'Machine' : 'User';
 
     // 1. Check Environment Variables
-    if (!await checkEnvironment(scope)) {
+    const envCheck = await checkEnvironmentDetailed(scope);
+    if (!envCheck.ok) {
         if (admin) {
             logger.warn(`Environment variables (${scope}) missing or incorrect. Fixing...`);
+            envCheck.problems.forEach(p => logger.debug(`  - ${p}`));
             try {
                 await setupEnvironment(scope);
             } catch (e) {
@@ -25,6 +27,7 @@ export async function selfHeal() {
             }
         } else {
             logger.warn('Environment variables missing or incorrect. Run as Administrator to fix Machine scope, or we will fix User scope now.');
+            envCheck.problems.forEach(p => logger.debug(`  - ${p}`));
             try {
                 await setupEnvironment(scope);
             } catch (e) {

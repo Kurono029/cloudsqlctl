@@ -1,6 +1,7 @@
 import axios from 'axios';
 import fs from 'fs-extra';
 import crypto from 'crypto';
+import path from 'path';
 import { PATHS } from '../system/paths.js';
 import { logger } from './logger.js';
 

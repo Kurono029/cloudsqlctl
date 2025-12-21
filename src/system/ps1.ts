@@ -11,26 +11,15 @@ const SCRIPTS = {
 Write-Host "Environment variables set."
 `,
     'install-proxy.ps1': `
-param([string]$ProxyPath = "${SYSTEM_PATHS.PROXY_EXE}")
-
-if (!(Test-Path $ProxyPath)) {
-    Write-Error "Proxy binary not found at $ProxyPath"
-    exit 1
-}
-
-$service = Get-Service -Name "${SERVICE_NAME}" -ErrorAction SilentlyContinue
-if ($service) {
-    Write-Host "Service ${SERVICE_NAME} already exists."
-} else {
-    New-Service -Name "${SERVICE_NAME}" -BinaryPathName $ProxyPath -StartupType Automatic
-    Write-Host "Service ${SERVICE_NAME} installed."
-}
+Write-Warning "DEPRECATED: Please use 'cloudsqlctl service install' instead."
+exit 1
 `,
     'uninstall-proxy.ps1': `
+Write-Warning "DEPRECATED: Please use 'cloudsqlctl service remove' instead."
 $service = Get-Service -Name "${SERVICE_NAME}" -ErrorAction SilentlyContinue
 if ($service) {
     Stop-Service -Name "${SERVICE_NAME}" -Force -ErrorAction SilentlyContinue
-    Remove-Service -Name "${SERVICE_NAME}" -ErrorAction SilentlyContinue
+    sc.exe delete "${SERVICE_NAME}"
     Write-Host "Service ${SERVICE_NAME} removed."
 }
 `,
@@ -49,3 +38,4 @@ export async function generateScripts() {
         logger.info(`Generated script: ${filePath}`);
     }
 }
+

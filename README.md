@@ -99,10 +99,24 @@ cloudsqlctl status
 
 Configuration and logs are stored in:
 
-- **User Scope (Default):** `%LOCALAPPDATA%\CloudSQLCTL`
-- **Machine Scope (Service):** `%ProgramData%\CloudSQLCTL`
+- **User Scope (Default)**:
+  - Config: `%LOCALAPPDATA%\CloudSQLCTL`
+  - Logs: `%LOCALAPPDATA%\CloudSQLCTL\logs`
+  - Binary: `%LOCALAPPDATA%\CloudSQLCTL\bin`
 
-You can view the exact paths used by your current environment:
+- **Machine Scope (Service)**:
+  - Config: `%ProgramData%\CloudSQLCTL`
+  - Logs: `%ProgramData%\CloudSQLCTL\logs`
+  - Binary: `%ProgramData%\CloudSQLCTL\bin`
+
+**Path Resolution Logic:**
+
+1. Environment Variables (`CLOUDSQLCTL_HOME`, etc.)
+2. Existing System Installation (`%ProgramData%`)
+3. Existing User Installation (`%LOCALAPPDATA%`)
+4. Default: User Scope (`%LOCALAPPDATA%`)
+
+Verify current paths with:
 
 ```powershell
 cloudsqlctl paths
@@ -115,11 +129,6 @@ This project uses GitHub Actions for automated releases.
 1. Tag a new version: `git tag v0.3.0`
 2. Push the tag: `git push origin v0.3.0`
 3. The workflow will build, test, sign (if configured), and publish artifacts to the [Releases](https://github.com/Kinin-Code-Offical/cloudsqlctl/releases) page.
-   `%LOCALAPPDATA%\CloudSQLCTL`
-
-- `config.json`: User preferences and selected instance.
-- `logs/`: Application and proxy logs.
-- `bin/`: The `cloud_sql_proxy.exe` binary.
 
 ## Troubleshooting
 

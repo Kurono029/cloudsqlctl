@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { logger } from '../core/logger.js';
 import { checkGcloudInstalled, getActiveAccount, checkAdc, listInstances } from '../core/gcloud.js';
-import { checkEnvironment } from '../system/env.js';
+import { checkEnvironmentDetailed } from '../system/env.js';
 import { isServiceInstalled } from '../system/service.js';
 import { getEnvVar } from '../system/powershell.js';
 import { PATHS, ENV_VARS } from '../system/paths.js';
@@ -46,12 +46,21 @@ export const doctorCommand = new Command('doctor')
         }
 
         // Check Environment Variables
-        const envOk = await checkEnvironment('Machine');
-        if (envOk) {
-            logger.info('✅ System Environment Variables are correct');
+        const envCheck = await checkEnvironmentDetailed('Machine');
+        if (envCheck.ok) {
+            logger.info('✅ Environment Variables (Machine) OK');
         } else {
-            logger.warn('⚠️ System Environment Variables are missing or incorrect');
+            // Try User scope
+            const userEnvCheck = await checkEnvironmentDetailed('User');
+            if (userEnvCheck.ok) {
+                logger.info('✅ Environment Variables (User) OK');
+            } else {
+                logger.warn('⚠️ Environment Variables issues found:');
+                envCheck.problems.forEach(p => logger.warn(`  [Machine] ${p}`));
+                userEnvCheck.problems.forEach(p => logger.warn(`  [User] ${p}`));
+            }
         }
+
 
         // Check Proxy Binary
         if (await fs.pathExists(PATHS.PROXY_EXE)) {

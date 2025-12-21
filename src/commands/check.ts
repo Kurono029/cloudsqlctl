@@ -1,18 +1,32 @@
 import { Command } from 'commander';
-import { checkEnvironment } from '../system/env.js';
+import { checkEnvironmentDetailed } from '../system/env.js';
 import { isServiceInstalled, isServiceRunning } from '../system/service.js';
 import { PATHS } from '../system/paths.js';
 import fs from 'fs-extra';
 import { logger } from '../core/logger.js';
+import { isAdmin } from '../system/powershell.js';
 
 export const checkCommand = new Command('check')
     .description('Verify full system configuration')
-    .action(async () => {
+    .option('--scope <scope>', 'Environment scope (User, Machine, or auto)', 'auto')
+    .action(async (options) => {
         try {
             logger.info('Checking system configuration...');
 
-            const envOk = await checkEnvironment('Machine');
-            logger.info(`Environment Variables (Machine): ${envOk ? 'OK' : 'MISSING/INCORRECT'}`);
+            let scope: 'Machine' | 'User' = 'User';
+            if (options.scope === 'auto') {
+                scope = await isAdmin() ? 'Machine' : 'User';
+            } else {
+                scope = options.scope;
+            }
+
+            const envCheck = await checkEnvironmentDetailed(scope);
+            if (envCheck.ok) {
+                logger.info(`Environment Variables (${scope}): OK`);
+            } else {
+                logger.warn(`Environment Variables (${scope}): ISSUES FOUND`);
+                envCheck.problems.forEach(p => logger.warn(`  - ${p}`));
+            }
 
             const binaryOk = await fs.pathExists(PATHS.PROXY_EXE);
             logger.info(`Proxy Binary: ${binaryOk ? 'OK' : 'MISSING'}`);
@@ -25,7 +39,7 @@ export const checkCommand = new Command('check')
                 logger.info(`Service Running: ${serviceRunning ? 'YES' : 'NO'}`);
             }
 
-            if (envOk && binaryOk && serviceInstalled) {
+            if (envCheck.ok && binaryOk) {
                 logger.info('System check passed.');
             } else {
                 logger.warn('System check failed. Run "cloudsqlctl repair" to fix.');

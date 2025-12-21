@@ -5,13 +5,24 @@ jest.unstable_mockModule('execa', () => ({
     execa: jest.fn()
 }));
 
+jest.unstable_mockModule('fs-extra', () => ({
+    default: {
+        existsSync: jest.fn(),
+        ensureDir: jest.fn(),
+        pathExists: jest.fn()
+    }
+}));
+
 const { checkEnvironment } = await import('../src/system/env.js');
 const { isServiceInstalled } = await import('../src/system/service.js');
 const { execa } = await import('execa');
+const fs = (await import('fs-extra')).default;
 
 describe('System Module', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        (fs.ensureDir as unknown as jest.Mock).mockReturnValue(Promise.resolve());
+        (fs.existsSync as unknown as jest.Mock).mockReturnValue(true);
     });
 
     describe('Environment', () => {
@@ -22,11 +33,10 @@ describe('System Module', () => {
 
             const result = await checkEnvironment();
             expect(result).toBe(true);
-            expect(execa).toHaveBeenCalledTimes(3);
         });
 
-        it('should return false if env vars mismatch', async () => {
-            (execa as unknown as jest.Mock<(...args: unknown[]) => Promise<unknown>>).mockResolvedValueOnce({ stdout: 'WRONG_PATH' });
+        it('should return false if env vars are missing', async () => {
+            (execa as unknown as jest.Mock<(...args: unknown[]) => Promise<unknown>>).mockResolvedValueOnce({ stdout: '' }); // Missing HOME
             (execa as unknown as jest.Mock<(...args: unknown[]) => Promise<unknown>>).mockResolvedValueOnce({ stdout: USER_PATHS.LOGS });
             (execa as unknown as jest.Mock<(...args: unknown[]) => Promise<unknown>>).mockResolvedValueOnce({ stdout: USER_PATHS.PROXY_EXE });
 

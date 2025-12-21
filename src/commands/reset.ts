@@ -5,10 +5,18 @@ import fs from 'fs-extra';
 
 export const resetCommand = new Command('reset')
     .description('Reset configuration and remove local files')
-    .action(async () => {
+    .option('--yes', 'Confirm reset without prompting')
+    .action(async (options) => {
         try {
-            logger.warn('This will remove all configuration and logs.');
-            // In a real app, ask for confirmation
+            if (!options.yes) {
+                logger.warn('This will remove all configuration and logs.');
+                logger.warn(`  - Config: ${PATHS.CONFIG_FILE}`);
+                logger.warn(`  - Logs: ${PATHS.LOGS}`);
+                logger.error('Operation aborted. Use --yes to confirm.');
+                process.exit(1);
+            }
+
+            logger.info('Resetting configuration...');
             await fs.remove(PATHS.CONFIG_FILE);
             await fs.remove(PATHS.LOGS);
             // Maybe keep the binary?

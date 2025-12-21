@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { PATHS, ENV_VARS } from '../system/paths.js';
+import { PATHS, PATHS_SOURCE, PATHS_REASON } from '../system/paths.js';
 import chalk from 'chalk';
 
 export const pathsCommand = new Command('paths')
@@ -21,14 +21,8 @@ export const pathsCommand = new Command('paths')
         });
 
         console.log(chalk.bold('\nResolution Source:'));
-
-        if (process.env[ENV_VARS.PROXY_PATH]) {
-            console.log(`- ${chalk.green('Environment Variable')} (${ENV_VARS.PROXY_PATH}) is set.`);
-        } else if (PATHS.HOME.includes('ProgramData')) {
-            console.log(`- ${chalk.yellow('System Installation')} (ProgramData detected).`);
-        } else {
-            console.log(`- ${chalk.blue('User Installation')} (AppData detected).`);
-        }
+        console.log(`- Source: ${chalk.green(PATHS_SOURCE)}`);
+        console.log(`- Reason: ${PATHS_REASON}`);
 
         console.log('');
     });

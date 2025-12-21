@@ -34,10 +34,15 @@ export const ENV_VARS = {
     GOOGLE_CREDS: 'GOOGLE_APPLICATION_CREDENTIALS'
 };
 
+export let PATHS_SOURCE: 'ENV' | 'SYSTEM_EXISTING' | 'USER_EXISTING' | 'DEFAULT_USER' = 'DEFAULT_USER';
+export let PATHS_REASON: string = 'Defaulting to User scope';
+
 function resolvePaths() {
     // 1. Priority: Environment Variables
     const envProxyPath = process.env[ENV_VARS.PROXY_PATH];
     if (envProxyPath) {
+        PATHS_SOURCE = 'ENV';
+        PATHS_REASON = `Environment variable ${ENV_VARS.PROXY_PATH} is set`;
         const proxyPath = envProxyPath;
         const home = process.env[ENV_VARS.HOME] || path.dirname(path.dirname(proxyPath)); // Guess home from proxy
         return {
@@ -56,6 +61,8 @@ function resolvePaths() {
 
     // 2. Fallback: Check for existing proxy file (System then User)
     if (fs.existsSync(SYSTEM_PATHS.PROXY_EXE)) {
+        PATHS_SOURCE = 'SYSTEM_EXISTING';
+        PATHS_REASON = `Found existing proxy at ${SYSTEM_PATHS.PROXY_EXE}`;
         return {
             ...SYSTEM_PATHS,
             CONFIG_DIR: SYSTEM_PATHS.HOME,
@@ -67,18 +74,15 @@ function resolvePaths() {
     }
 
     if (fs.existsSync(USER_PATHS.PROXY_EXE)) {
+        PATHS_SOURCE = 'USER_EXISTING';
+        PATHS_REASON = `Found existing proxy at ${USER_PATHS.PROXY_EXE}`;
         return USER_PATHS;
     }
 
-    // 3. Default: System Paths (Target for new installation)
-    return {
-        ...SYSTEM_PATHS,
-        CONFIG_DIR: SYSTEM_PATHS.HOME,
-        CONFIG_FILE: path.join(SYSTEM_PATHS.HOME, 'config.json'),
-        TEMP: path.join(SYSTEM_PATHS.HOME, 'temp'),
-        GCLOUD_DIR: path.join(SYSTEM_PATHS.HOME, 'gcloud'),
-        PID_FILE: path.join(SYSTEM_PATHS.HOME, 'proxy.pid'),
-    };
+    // 3. Default: User Paths (Target for new installation)
+    PATHS_SOURCE = 'DEFAULT_USER';
+    PATHS_REASON = 'Defaulting to User scope (no existing installation found)';
+    return USER_PATHS;
 }
 
 // Default to resolved paths
