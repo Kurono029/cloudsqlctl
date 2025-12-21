@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { USER_PATHS, SERVICE_NAME } from '../src/system/paths.js';
+import { USER_PATHS } from '../src/system/paths.js';
 
 jest.unstable_mockModule('execa', () => ({
     execa: jest.fn()

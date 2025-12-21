@@ -10,8 +10,6 @@ const CLI_PATH = path.join(ROOT_DIR, 'dist', 'cli.cjs');
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 const DOCS_FILE = path.join(DOCS_DIR, 'commands.md');
 
-const HOME_DIR = os.homedir();
-
 async function runCli(args) {
   const { stdout } = await execa('node', [CLI_PATH, ...args]);
 
