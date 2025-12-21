@@ -177,9 +177,9 @@ export async function applyUpdateInstaller(installerPath: string, silent: boolea
 
     if (elevate) {
         // Use PowerShell Start-Process -Verb RunAs
-        // We use a script block and pass arguments to avoid injection
-        const psCommand = '& { param($p, $a) Start-Process -FilePath $p -ArgumentList $a -Verb RunAs -Wait }';
-        await execa('powershell', ['-NoProfile', '-Command', psCommand, installerPath, args.join(' ')]);
+        // Use $args array to pass parameters safely to the script block, avoiding command injection
+        const psCommand = '& { $p, $a = $args; Start-Process -FilePath $p -ArgumentList $a -Verb RunAs -Wait }';
+        await execa('powershell', ['-NoProfile', '-NonInteractive', '-Command', psCommand, installerPath, ...args]);
     } else {
         await execa(installerPath, args);
     }
