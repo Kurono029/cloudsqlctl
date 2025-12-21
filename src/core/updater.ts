@@ -44,7 +44,7 @@ export async function downloadProxy(version: string, targetPath: string = PATHS.
         downloadUrl = `https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/${version}/${ASSET_NAME}`;
 
         // Extract checksum from release body
-        const body = response.data.body;
+        const { body } = response.data;
         // Regex to match: | [cloud-sql-proxy.x64.exe](...) | <hash> |
         const checksumRegex = new RegExp(`\\| \\[${ASSET_NAME.replace(/\./g, '\\.')}\\]\\(.*?\\) \\| ([a-f0-9]{64}) \\|`);
         const match = body.match(checksumRegex);

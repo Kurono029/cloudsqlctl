@@ -39,17 +39,21 @@ Or manually: `gcloud auth application-default login`
 
 **Solution**:
 
-1.  Check your active project:
-    ```powershell
-    gcloud config get-value project
-    ```
-2.  Switch projects if necessary:
-    ```powershell
-    cloudsqlctl setup
-    # OR
-    gcloud config set project <PROJECT_ID>
-    ```
-3.  Ensure your user has the `Cloud SQL Client` role.
+1. Check your active project:
+
+   ```powershell
+   gcloud config get-value project
+   ```
+
+2. Switch projects if necessary:
+
+   ```powershell
+   cloudsqlctl setup
+   # OR
+   gcloud config set project <PROJECT_ID>
+   ```
+
+3. Ensure your user has the `Cloud SQL Client` role.
 
 ### Proxy fails to start
 
@@ -57,14 +61,17 @@ Or manually: `gcloud auth application-default login`
 
 **Solution**:
 
-1.  Check the logs for detailed error messages:
-    ```powershell
-    cloudsqlctl logs
-    ```
-2.  Try running the proxy in the foreground to see immediate output:
-    ```powershell
-    cloudsqlctl start --foreground
-    ```
+1. Check the logs for detailed error messages:
+
+   ```powershell
+   cloudsqlctl logs
+   ```
+
+2. Try running the proxy in the foreground to see immediate output:
+
+   ```powershell
+   cloudsqlctl start --foreground
+   ```
 
 ## Resetting Configuration
 

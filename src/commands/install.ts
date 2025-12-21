@@ -13,7 +13,7 @@ export const installCommand = new Command('install')
                 await stopProxy();
             }
 
-            let version = options.version;
+            let { version } = options;
             if (!version) {
                 logger.info('Fetching latest version...');
                 version = await getLatestVersion();

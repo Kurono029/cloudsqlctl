@@ -12,10 +12,10 @@ cloudsqlctl setup
 
 This wizard will guide you through:
 
-1.  **Checking Prerequisites**: Verifies `gcloud` is installed.
-2.  **Authentication**: Helps you login to Google Cloud (`gcloud auth login`) and set up Application Default Credentials (`gcloud auth application-default login`).
-3.  **Project Selection**: Lets you select the active Google Cloud project.
-4.  **Proxy Installation**: Downloads the Cloud SQL Auth Proxy binary if it's missing.
+1. **Checking Prerequisites**: Verifies `gcloud` is installed.
+2. **Authentication**: Helps you login to Google Cloud (`gcloud auth login`) and set up Application Default Credentials (`gcloud auth application-default login`).
+3. **Project Selection**: Lets you select the active Google Cloud project.
+4. **Proxy Installation**: Downloads the Cloud SQL Auth Proxy binary if it's missing.
 
 ## Manual Configuration
 
