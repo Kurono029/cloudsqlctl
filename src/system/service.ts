@@ -108,3 +108,18 @@ export async function stopService() {
     logger.info(`Stopping service ${SERVICE_NAME}...`);
     await runPs(`Stop-Service -Name "${SERVICE_NAME}" -Force`);
 }
+
+export async function setServiceStartupType(type: 'Automatic' | 'Manual' | 'Disabled' | 'Delayed') {
+    if (!await isAdmin()) {
+        throw new Error('Admin privileges required to change service startup type.');
+    }
+
+    if (type === 'Delayed') {
+        // Delayed start is a special case of Automatic
+        await runPs(`Set-Service -Name "${SERVICE_NAME}" -StartupType Automatic`);
+        await runPs(`sc.exe config "${SERVICE_NAME}" start= delayed-auto`);
+    } else {
+        await runPs(`Set-Service -Name "${SERVICE_NAME}" -StartupType ${type}`);
+    }
+    logger.info(`Service startup type set to ${type}.`);
+}

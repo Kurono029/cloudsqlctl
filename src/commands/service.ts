@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { installService, uninstallService, startService, stopService, isServiceInstalled, isServiceRunning, updateServiceBinPath } from '../system/service.js';
+import { installService, uninstallService, startService, stopService, isServiceInstalled, isServiceRunning, updateServiceBinPath, setServiceStartupType } from '../system/service.js';
 import { logger } from '../core/logger.js';
 
 export const serviceCommand = new Command('service')
@@ -92,6 +92,32 @@ serviceCommand.command('status')
             logger.info(`Service is ${running ? 'RUNNING' : 'STOPPED'}.`);
         } catch (error) {
             logger.error('Failed to check service status', error);
+            process.exit(1);
+        }
+    });
+
+serviceCommand.command('startup')
+    .description('Set Service Startup Type')
+    .argument('<type>', 'Startup type (automatic, manual, disabled, delayed)')
+    .action(async (type) => {
+        const validTypes = ['automatic', 'manual', 'disabled', 'delayed'];
+        const normalizedType = type.toLowerCase();
+
+        if (!validTypes.includes(normalizedType)) {
+            logger.error(`Invalid startup type. Must be one of: ${validTypes.join(', ')}`);
+            process.exit(1);
+        }
+
+        try {
+            const typeMap: Record<string, 'Automatic' | 'Manual' | 'Disabled' | 'Delayed'> = {
+                'automatic': 'Automatic',
+                'manual': 'Manual',
+                'disabled': 'Disabled',
+                'delayed': 'Delayed'
+            };
+            await setServiceStartupType(typeMap[normalizedType]);
+        } catch (error) {
+            logger.error('Failed to set startup type', error);
             process.exit(1);
         }
     });

@@ -207,6 +207,7 @@ Commands:
   start                Start the Windows Service
   stop                 Stop the Windows Service
   status               Check Service Status
+  startup <type>       Set Service Startup Type
   help [command]       display help for command
 ```
 
