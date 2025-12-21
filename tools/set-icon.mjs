@@ -11,7 +11,10 @@ const packageJsonPath = path.resolve(__dirname, '../package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 const { version } = packageJson;
 
-const exePath = path.resolve(__dirname, '../bin/cloudsqlctl.exe');
+const defaultExePath = path.resolve(__dirname, '../bin/cloudsqlctl.exe');
+const targetArg = process.argv[2];
+const exePath = targetArg ? path.resolve(process.cwd(), targetArg) : defaultExePath;
+
 const iconPath = path.resolve(__dirname, '../assets/logo.ico');
 
 async function main() {

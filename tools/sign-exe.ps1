@@ -1,7 +1,7 @@
 param(
     [string]$ExePath = "bin\cloudsqlctl.exe",
     [string]$CertPath = "$env:CLOUDSQLCTL_SIGN_CERT",
-    [SecureString]$CertPassword = "$env:CLOUDSQLCTL_SIGN_PWD"
+    [string]$CertPassword = "$env:CLOUDSQLCTL_SIGN_PWD"
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,7 +20,14 @@ if (-not $CertPath -or -not (Test-Path $CertPath)) {
 Write-Host "Signing $ExePath with certificate $CertPath..."
 
 try {
-    $cert = Get-PfxCertificate -FilePath $CertPath
+    if ($CertPassword) {
+        $securePass = ConvertTo-SecureString -String $CertPassword -AsPlainText -Force
+        $cert = Get-PfxCertificate -FilePath $CertPath -Password $securePass
+    }
+    else {
+        $cert = Get-PfxCertificate -FilePath $CertPath
+    }
+    
     Set-AuthenticodeSignature -FilePath $ExePath -Certificate $cert -TimestampServer "http://timestamp.digicert.com"
     Write-Host "Successfully signed $ExePath"
 }

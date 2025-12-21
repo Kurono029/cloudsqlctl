@@ -32,17 +32,17 @@ node --experimental-sea-config dist/sea-config.json
 Write-Host "Copying node.exe..."
 Copy-Item (Get-Command node).Source "dist/cloudsqlctl-base.exe"
 
-# 5. Inject blob
+# 5. Set Icon/Metadata (Before injection to avoid rcedit issues with SEA blobs)
+Write-Host "Setting icon and metadata..."
+node tools/set-icon.mjs "dist/cloudsqlctl-base.exe"
+
+# 6. Inject blob
 Write-Host "Injecting blob..."
 npx postject dist/cloudsqlctl-base.exe NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
-# 6. Move to bin
+# 7. Move to bin
 Write-Host "Finalizing..."
 Move-Item -Path "dist/cloudsqlctl-base.exe" -Destination "bin/cloudsqlctl.exe" -Force
-
-# 7. Set Icon (if available)
-Write-Host "Setting icon..."
-node tools/set-icon.mjs
 
 # 8. Sign Executable (Optional)
 Write-Host "Attempting to sign executable..."
