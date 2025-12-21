@@ -5,7 +5,7 @@ export async function runPs(command: string): Promise<string> {
     try {
         const { stdout } = await execa('powershell', ['-NoProfile', '-NonInteractive', '-Command', command]);
         return stdout.trim();
-    } catch (error: any) {
+    } catch (error) {
         logger.debug(`PowerShell command failed: ${command}`, error);
         throw error;
     }

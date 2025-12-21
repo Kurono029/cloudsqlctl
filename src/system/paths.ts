@@ -2,7 +2,6 @@ import path from 'path';
 import os from 'os';
 
 const PROGRAM_DATA = process.env.ProgramData || 'C:\\ProgramData';
-const APP_DATA = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
 const LOCAL_APP_DATA = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
 
 export const USER_PATHS = {

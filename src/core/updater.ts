@@ -80,9 +80,21 @@ export async function downloadProxy(version: string, targetPath: string = PATHS.
 
         if (checksumUrl) {
             logger.info('Verifying checksum...');
-            // ... checksum logic ...
-            // For now, skipping strict checksum implementation details as per previous context, 
-            // but ensuring the structure supports it.
+            try {
+                const checksumResponse = await axios.get(checksumUrl);
+                const expectedChecksum = checksumResponse.data.trim().split(' ')[0];
+                const isValid = await verifyChecksum(targetPath, expectedChecksum);
+
+                if (!isValid) {
+                    throw new Error('Checksum verification failed');
+                }
+                logger.info('Checksum verified.');
+            } catch (err) {
+                logger.warn('Failed to verify checksum', err);
+                // If verification fails, we should probably remove the file
+                await fs.remove(targetPath);
+                throw err;
+            }
         }
 
     } catch (error) {
