@@ -117,7 +117,7 @@ begin
   begin
     // Copy to Common AppData
     ForceDirectories(ExpandConstant('{commonappdata}\CloudSQLCTL\bin'));
-    if FileCopy(UserBin, CommonBin, False) then
+    if CopyFile(UserBin, CommonBin, False) then
     begin
       Result := CommonBin;
       exit;

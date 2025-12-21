@@ -35,27 +35,25 @@ async function verifyChecksum(filePath: string, expectedChecksum: string): Promi
 
 export async function downloadProxy(version: string, targetPath: string = PATHS.PROXY_EXE) {
     let downloadUrl: string | undefined;
-    let checksumUrl: string | undefined;
+    let expectedChecksum: string | undefined;
 
     try {
         const releaseUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${version}`;
         const response = await axios.get(releaseUrl);
-        const assets = response.data.assets;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const asset = assets.find((a: any) => a.name === ASSET_NAME);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const checksumAsset = assets.find((a: any) => a.name === CHECKSUM_ASSET_NAME);
 
-        if (asset) {
-            downloadUrl = asset.browser_download_url;
-        }
+        // Google Cloud SQL Proxy v2 binaries are hosted on GCS
+        downloadUrl = `https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/${version}/${ASSET_NAME}`;
 
-        if (checksumAsset) {
-            checksumUrl = checksumAsset.browser_download_url;
-        }
+        // Extract checksum from release body
+        const body = response.data.body;
+        // Regex to match: | [cloud-sql-proxy.x64.exe](...) | <hash> |
+        const checksumRegex = new RegExp(`\\| \\[${ASSET_NAME.replace(/\./g, '\\.')}\\]\\(.*?\\) \\| ([a-f0-9]{64}) \\|`);
+        const match = body.match(checksumRegex);
 
-        if (!downloadUrl) {
-            throw new Error(`Could not find asset ${ASSET_NAME} in release ${version}`);
+        if (match && match[1]) {
+            expectedChecksum = match[1];
+        } else {
+            logger.warn(`Could not extract checksum for ${ASSET_NAME} from release notes.`);
         }
 
         logger.info(`Downloading ${ASSET_NAME} from ${downloadUrl}...`);
@@ -79,11 +77,9 @@ export async function downloadProxy(version: string, targetPath: string = PATHS.
 
         logger.info('Download complete.');
 
-        if (checksumUrl) {
+        if (expectedChecksum) {
             logger.info('Verifying checksum...');
             try {
-                const checksumResponse = await axios.get(checksumUrl);
-                const expectedChecksum = checksumResponse.data.trim().split(' ')[0];
                 const isValid = await verifyChecksum(targetPath, expectedChecksum);
 
                 if (!isValid) {
@@ -96,6 +92,8 @@ export async function downloadProxy(version: string, targetPath: string = PATHS.
                 await fs.remove(targetPath);
                 throw err;
             }
+        } else {
+            logger.warn('Skipping checksum verification (checksum not found).');
         }
 
     } catch (error) {

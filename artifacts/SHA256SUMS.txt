@@ -1,1 +1,2 @@
-cc7a6dce911bcc4778a8e8f315428dcf1f42d21a29240cbc94849ea85309ad63  cloudsqlctl.exe
+fba808877110583ee067cfa9d19144c42ce8d8d8675a654b17a98c5b204b5567  cloudsqlctl-setup.exe
+d2427408dcbed72aa00a28fdfb55325ecb5ab847d1d7e23cdb8abef900308d12  cloudsqlctl.exe

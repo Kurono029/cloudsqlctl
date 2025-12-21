@@ -21,17 +21,13 @@ import { authCommand } from './commands/auth.js';
 import { setupCommand } from './commands/setup.js';
 import { pathsCommand } from './commands/paths.js';
 import { logger } from './core/logger.js';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const pkg = require('../package.json');
 
 const program = new Command();
 
 program
     .name('cloudsqlctl')
     .description('CLI for managing Google Cloud SQL Auth Proxy')
-    .version(pkg.version);
+    .version(process.env.CLOUDSQLCTL_VERSION ?? '0.0.0');
 
 program.addCommand(installCommand);
 program.addCommand(updateCommand);

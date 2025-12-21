@@ -6,7 +6,7 @@ import { PATHS } from '../system/paths.js';
 import fs from 'fs-extra';
 import path from 'path';
 import axios from 'axios';
-import { execa } from 'execa';
+import extract from 'extract-zip';
 
 // Official Google Cloud SDK download URL pattern
 const GCLOUD_DOWNLOAD_URL = 'https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-windows-x86_64.zip';
@@ -55,9 +55,9 @@ gcloudCommand.command('install')
                 writer.on('error', reject);
             });
 
-            logger.info('Extracting...');
-            // Use PowerShell to extract
-            await execa('powershell', ['-Command', `Expand-Archive -Path "${zipPath}" -DestinationPath "${PATHS.GCLOUD_DIR}" -Force`]);
+            logger.info('Extracting (this may take a moment)...');
+            // Use extract-zip for faster and reliable extraction
+            await extract(zipPath, { dir: PATHS.GCLOUD_DIR });
 
             const gcloudExe = path.join(PATHS.GCLOUD_DIR, 'google-cloud-sdk', 'bin', 'gcloud.cmd');
 
