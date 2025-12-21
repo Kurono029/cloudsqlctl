@@ -1,5 +1,6 @@
 import path from 'path';
 import os from 'os';
+import fs from 'fs-extra';
 
 const PROGRAM_DATA = process.env.ProgramData || 'C:\\ProgramData';
 const LOCAL_APP_DATA = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
@@ -32,25 +33,52 @@ export const ENV_VARS = {
 };
 
 function resolvePaths() {
-    const home = process.env[ENV_VARS.HOME] || USER_PATHS.HOME;
-    const logs = process.env[ENV_VARS.LOGS] || path.join(home, 'logs');
-    const bin = path.join(home, 'bin');
-    const proxyExe = process.env[ENV_VARS.PROXY_PATH] || path.join(bin, 'cloud-sql-proxy.exe');
+    // 1. Priority: Environment Variables
+    const envProxyPath = process.env[ENV_VARS.PROXY_PATH];
+    if (envProxyPath) {
+        const proxyPath = envProxyPath;
+        const home = process.env[ENV_VARS.HOME] || path.dirname(path.dirname(proxyPath)); // Guess home from proxy
+        return {
+            HOME: home,
+            LOGS: process.env[ENV_VARS.LOGS] || path.join(home, 'logs'),
+            BIN: path.dirname(proxyPath),
+            PROXY_EXE: proxyPath,
+            CONFIG_DIR: home,
+            CONFIG_FILE: path.join(home, 'config.json'),
+            TEMP: path.join(home, 'temp'),
+            GCLOUD_DIR: path.join(home, 'gcloud'),
+            PID_FILE: path.join(home, 'proxy.pid'),
+        };
+    }
 
+    // 2. Fallback: Check for existing proxy file (System then User)
+    if (fs.existsSync(SYSTEM_PATHS.PROXY_EXE)) {
+        return {
+            ...SYSTEM_PATHS,
+            CONFIG_DIR: SYSTEM_PATHS.HOME,
+            CONFIG_FILE: path.join(SYSTEM_PATHS.HOME, 'config.json'),
+            TEMP: path.join(SYSTEM_PATHS.HOME, 'temp'),
+            GCLOUD_DIR: path.join(SYSTEM_PATHS.HOME, 'gcloud'),
+            PID_FILE: path.join(SYSTEM_PATHS.HOME, 'proxy.pid'),
+        };
+    }
+
+    if (fs.existsSync(USER_PATHS.PROXY_EXE)) {
+        return USER_PATHS;
+    }
+
+    // 3. Default: System Paths (Target for new installation)
     return {
-        HOME: home,
-        LOGS: logs,
-        BIN: bin,
-        PROXY_EXE: proxyExe,
-        CONFIG_DIR: home,
-        CONFIG_FILE: path.join(home, 'config.json'),
-        TEMP: path.join(home, 'temp'),
-        GCLOUD_DIR: path.join(home, 'gcloud'),
-        PID_FILE: path.join(home, 'proxy.pid'),
+        ...SYSTEM_PATHS,
+        CONFIG_DIR: SYSTEM_PATHS.HOME,
+        CONFIG_FILE: path.join(SYSTEM_PATHS.HOME, 'config.json'),
+        TEMP: path.join(SYSTEM_PATHS.HOME, 'temp'),
+        GCLOUD_DIR: path.join(SYSTEM_PATHS.HOME, 'gcloud'),
+        PID_FILE: path.join(SYSTEM_PATHS.HOME, 'proxy.pid'),
     };
 }
 
-// Default to resolved paths (User scope by default, or ENV overrides)
+// Default to resolved paths
 export const PATHS = resolvePaths();
 
 export const SERVICE_NAME = 'cloudsql-proxy';

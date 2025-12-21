@@ -11,8 +11,8 @@ export const checkCommand = new Command('check')
         try {
             logger.info('Checking system configuration...');
 
-            const envOk = await checkEnvironment();
-            logger.info(`Environment Variables: ${envOk ? 'OK' : 'MISSING/INCORRECT'}`);
+            const envOk = await checkEnvironment('Machine');
+            logger.info(`Environment Variables (Machine): ${envOk ? 'OK' : 'MISSING/INCORRECT'}`);
 
             const binaryOk = await fs.pathExists(PATHS.PROXY_EXE);
             logger.info(`Proxy Binary: ${binaryOk ? 'OK' : 'MISSING'}`);

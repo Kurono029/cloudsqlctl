@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { SYSTEM_PATHS } from './paths.js';
+import { PATHS } from './paths.js';
 import { checkEnvironment, setupEnvironment } from './env.js';
 import { isServiceInstalled, installService } from './service.js';
 import { getLatestVersion, downloadProxy } from '../core/updater.js';
@@ -11,27 +11,33 @@ export async function selfHeal() {
     logger.info('Running self-healing checks...');
 
     const admin = await isAdmin();
+    const scope = admin ? 'Machine' : 'User';
 
     // 1. Check Environment Variables
-    if (!await checkEnvironment()) {
+    if (!await checkEnvironment(scope)) {
         if (admin) {
-            logger.warn('Environment variables missing or incorrect. Fixing...');
+            logger.warn(`Environment variables (${scope}) missing or incorrect. Fixing...`);
             try {
-                await setupEnvironment();
+                await setupEnvironment(scope);
             } catch (e) {
                 logger.error('Failed to fix environment variables', e);
             }
         } else {
-            logger.warn('Environment variables missing or incorrect. Run as Administrator to fix.');
+            logger.warn('Environment variables missing or incorrect. Run as Administrator to fix Machine scope, or we will fix User scope now.');
+            try {
+                await setupEnvironment(scope);
+            } catch (e) {
+                logger.error('Failed to fix environment variables', e);
+            }
         }
     }
 
     // 2. Check Proxy Binary
-    if (!await fs.pathExists(SYSTEM_PATHS.PROXY_EXE)) {
+    if (!await fs.pathExists(PATHS.PROXY_EXE)) {
         logger.warn('Proxy binary missing. Downloading...');
         try {
             const version = await getLatestVersion();
-            await downloadProxy(version);
+            await downloadProxy(version, PATHS.PROXY_EXE);
         } catch (e) {
             logger.error('Failed to download proxy binary', e);
         }

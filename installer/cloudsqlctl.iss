@@ -5,19 +5,15 @@
 #define MyAppExeName "cloudsqlctl.exe"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
-; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{8A4B2C1D-E3F4-5678-9012-3456789ABCDE}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-; Install for all users (requires admin)
 PrivilegesRequired=admin
 OutputDir=..\dist
 OutputBaseFilename=cloudsqlctl-setup
@@ -38,12 +34,20 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 ; Add to System PATH
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
 
-; Optional: Set Environment Variables for Machine Scope
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "CLOUDSQLCTL_HOME"; ValueData: "{commonappdata}\CloudSQLCTL"; Flags: createvalueifdoesntexist uninsdeletevalue
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "CLOUDSQLCTL_LOGS"; ValueData: "{commonappdata}\CloudSQLCTL\logs"; Flags: createvalueifdoesntexist uninsdeletevalue
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "CLOUDSQLCTL_PROXY_PATH"; ValueData: "{commonappdata}\CloudSQLCTL\bin\cloud-sql-proxy.exe"; Flags: createvalueifdoesntexist uninsdeletevalue
+; Environment Variables (Machine Scope) - Logic handled in Code section for smart reuse
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "CLOUDSQLCTL_HOME"; ValueData: "{code:GetHomeDir}"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "CLOUDSQLCTL_LOGS"; ValueData: "{code:GetLogsDir}"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "CLOUDSQLCTL_PROXY_PATH"; ValueData: "{code:GetProxyPath}"; Flags: uninsdeletevalue
+
+[Dirs]
+Name: "{commonappdata}\CloudSQLCTL"; Permissions: users-modify
+Name: "{commonappdata}\CloudSQLCTL\logs"; Permissions: users-modify
+Name: "{commonappdata}\CloudSQLCTL\bin"; Permissions: users-modify
 
 [Code]
+var
+  ProxyPath: string;
+
 function NeedsAddPath(Param: string): boolean;
 var
   OrigPath: string;
@@ -55,7 +59,68 @@ begin
     Result := True;
     exit;
   end;
-  // look for the path with leading and trailing semicolon
-  // Pos() returns 0 if not found
   Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+end;
+
+function GetHomeDir(Param: string): string;
+var
+  ExistingHome: string;
+begin
+  // Reuse existing HOME if set
+  if RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'CLOUDSQLCTL_HOME', ExistingHome) then
+  begin
+    if DirExists(ExistingHome) then
+    begin
+      Result := ExistingHome;
+      exit;
+    end;
+  end;
+  Result := ExpandConstant('{commonappdata}\CloudSQLCTL');
+end;
+
+function GetLogsDir(Param: string): string;
+begin
+  Result := ExpandConstant('{commonappdata}\CloudSQLCTL\logs');
+end;
+
+function GetProxyPath(Param: string): string;
+var
+  ExistingProxy: string;
+  CommonBin: string;
+  UserBin: string;
+begin
+  // 1. Check Registry for existing
+  if RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'CLOUDSQLCTL_PROXY_PATH', ExistingProxy) then
+  begin
+    if FileExists(ExistingProxy) then
+    begin
+      Result := ExistingProxy;
+      exit;
+    end;
+  end;
+
+  CommonBin := ExpandConstant('{commonappdata}\CloudSQLCTL\bin\cloud-sql-proxy.exe');
+  
+  // 2. Check if exists in Common AppData
+  if FileExists(CommonBin) then
+  begin
+    Result := CommonBin;
+    exit;
+  end;
+
+  // 3. Check User AppData (Migration scenario)
+  UserBin := ExpandConstant('{localappdata}\CloudSQLCTL\bin\cloud-sql-proxy.exe');
+  if FileExists(UserBin) then
+  begin
+    // Copy to Common AppData
+    ForceDirectories(ExpandConstant('{commonappdata}\CloudSQLCTL\bin'));
+    if FileCopy(UserBin, CommonBin, False) then
+    begin
+      Result := CommonBin;
+      exit;
+    end;
+  end;
+
+  // 4. Default
+  Result := CommonBin;
 end;

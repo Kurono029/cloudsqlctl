@@ -3,7 +3,7 @@ import { logger } from '../core/logger.js';
 import { checkGcloudInstalled, getActiveAccount } from '../core/gcloud.js';
 import { checkEnvironment } from '../system/env.js';
 import { isServiceInstalled } from '../system/service.js';
-import { SYSTEM_PATHS } from '../system/paths.js';
+import { PATHS } from '../system/paths.js';
 import fs from 'fs-extra';
 import axios from 'axios';
 
@@ -29,7 +29,7 @@ export const doctorCommand = new Command('doctor')
         }
 
         // Check Environment Variables
-        const envOk = await checkEnvironment();
+        const envOk = await checkEnvironment('Machine');
         if (envOk) {
             logger.info('✅ System Environment Variables are correct');
         } else {
@@ -37,7 +37,7 @@ export const doctorCommand = new Command('doctor')
         }
 
         // Check Proxy Binary
-        if (await fs.pathExists(SYSTEM_PATHS.PROXY_EXE)) {
+        if (await fs.pathExists(PATHS.PROXY_EXE)) {
             logger.info('✅ Cloud SQL Proxy binary found');
         } else {
             logger.error('❌ Cloud SQL Proxy binary NOT found');

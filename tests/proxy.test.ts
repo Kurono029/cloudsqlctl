@@ -4,6 +4,7 @@ import { jest } from '@jest/globals';
 jest.unstable_mockModule('fs-extra', () => ({
     default: {
         pathExists: jest.fn().mockReturnValue(Promise.resolve(false)),
+        existsSync: jest.fn().mockReturnValue(false),
         readFile: jest.fn(),
         writeFile: jest.fn(),
         remove: jest.fn(),
