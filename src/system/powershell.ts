@@ -1,18 +1,40 @@
 import { execa } from 'execa';
 import { logger } from '../core/logger.js';
 
-export async function runPs(command: string, args: string[] = []): Promise<string> {
+export async function runPs(script: string, args: string[] = []): Promise<string> {
     try {
+        // To prevent command injection, we pass arguments via environment variables
+        // and reconstruct the $args array inside PowerShell.
+        // This ensures that arguments are never interpreted as code by the PowerShell parser.
+        const envVars: Record<string, string> = {};
+        args.forEach((arg, i) => {
+            envVars[`PS_ARG_${i}`] = arg;
+        });
+
+        const wrapper = `
+            $args = @()
+            for ($i = 0; $true; $i++) {
+                $varName = "PS_ARG_$i"
+                if (Test-Path "Env:$varName") {
+                    $args += [System.Environment]::GetEnvironmentVariable($varName)
+                } else {
+                    break
+                }
+            }
+            & { ${script} } @args
+        `.trim();
+
         const { stdout } = await execa('powershell', [
             '-NoProfile',
             '-NonInteractive',
             '-Command',
-            command,
-            ...args
-        ]);
+            wrapper
+        ], {
+            env: { ...process.env, ...envVars }
+        });
         return stdout.trim();
     } catch (error) {
-        logger.debug(`PowerShell command failed: ${command}`, error);
+        logger.debug(`PowerShell script failed: ${script}`, error);
         throw error;
     }
 }

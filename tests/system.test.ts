@@ -51,7 +51,11 @@ describe('System Module', () => {
 
             const result = await isServiceInstalled();
             expect(result).toBe(true);
-            expect(execa).toHaveBeenCalledWith('powershell', expect.arrayContaining([expect.stringContaining('Get-Service -Name $args[0]')]));
+            expect(execa).toHaveBeenCalledWith(
+                'powershell',
+                expect.arrayContaining([expect.stringContaining('Get-Service -Name $args[0]')]),
+                expect.any(Object)
+            );
         });
 
         it('should return false if service check fails', async () => {

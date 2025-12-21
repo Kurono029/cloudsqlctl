@@ -177,9 +177,21 @@ export async function applyUpdateInstaller(installerPath: string, silent: boolea
 
     if (elevate) {
         // Use PowerShell Start-Process -Verb RunAs
-        // Use $args array to pass parameters safely to the script block, avoiding command injection
-        const psCommand = '& { $p, $a = $args; Start-Process -FilePath $p -ArgumentList $a -Verb RunAs -Wait }';
-        await execa('powershell', ['-NoProfile', '-NonInteractive', '-Command', psCommand, installerPath, ...args]);
+        // To prevent command injection, we pass arguments via environment variables.
+        const envVars: Record<string, string> = {
+            'PS_INSTALLER_PATH': installerPath,
+            'PS_INSTALLER_ARGS': args.join(' ')
+        };
+
+        const psCommand = `
+            $p = [System.Environment]::GetEnvironmentVariable('PS_INSTALLER_PATH')
+            $a = [System.Environment]::GetEnvironmentVariable('PS_INSTALLER_ARGS')
+            Start-Process -FilePath $p -ArgumentList $a -Verb RunAs -Wait
+        `.trim();
+
+        await execa('powershell', ['-NoProfile', '-NonInteractive', '-Command', psCommand], {
+            env: { ...process.env, ...envVars }
+        });
     } else {
         await execa(installerPath, args);
     }

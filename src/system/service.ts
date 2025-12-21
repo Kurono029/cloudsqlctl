@@ -73,8 +73,8 @@ export async function updateServiceBinPath(instance: string, port: number = 5432
 
     const binPath = buildServiceBinPath(SYSTEM_PATHS.PROXY_EXE, instance, port, extraArgs);
 
-    // Use CIM/WMI to update service path with arguments
-    await runPs('& { $svc = Get-CimInstance Win32_Service -Filter "Name=$($args[0])"; Invoke-CimMethod -InputObject $svc -MethodName Change -Arguments @{ PathName = $args[1] } }', [SERVICE_NAME, binPath]);
+    // Use CIM/WMI to update service path with arguments safely
+    await runPs('& { $svc = Get-CimInstance Win32_Service | Where-Object { $_.Name -eq $args[0] }; Invoke-CimMethod -InputObject $svc -MethodName Change -Arguments @{ PathName = $args[1] } }', [SERVICE_NAME, binPath]);
 }
 
 export async function uninstallService() {
