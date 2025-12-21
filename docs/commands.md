@@ -1,11 +1,11 @@
 # Cloud SQL Proxy CLI Reference
 
-**Version:** 0.4.2
+**Version:** 0.4.3
 **Generated:** 2025-12-21
 
 ## Overview
 
-```text
+```
 Usage: cloudsqlctl [options] [command]
 
 CLI for managing Google Cloud SQL Auth Proxy
@@ -39,6 +39,7 @@ Commands:
   setup                         Interactive setup wizard
   paths                         Show resolved system paths and configuration
                                 locations
+  upgrade [options]             Upgrade cloudsqlctl to the latest version
   help [command]                display help for command
 ```
 
@@ -46,7 +47,7 @@ Commands:
 
 ### install
 
-```text
+```
 Usage: cloudsqlctl install [options]
 
 Download and install Cloud SQL Proxy
@@ -58,7 +59,7 @@ Options:
 
 ### update
 
-```text
+```
 Usage: cloudsqlctl update [options]
 
 Update Cloud SQL Proxy to the latest version
@@ -69,7 +70,7 @@ Options:
 
 ### select
 
-```text
+```
 Usage: cloudsqlctl select [options]
 
 Select a Cloud SQL instance
@@ -80,7 +81,7 @@ Options:
 
 ### list
 
-```text
+```
 Usage: cloudsqlctl list [options]
 
 List available Cloud SQL instances
@@ -92,7 +93,7 @@ Options:
 
 ### connect
 
-```text
+```
 Usage: cloudsqlctl connect [options] <instance>
 
 Connect to a specific Cloud SQL instance
@@ -107,7 +108,7 @@ Options:
 
 ### start
 
-```text
+```
 Usage: cloudsqlctl start [options]
 
 Start the Cloud SQL Proxy
@@ -119,7 +120,7 @@ Options:
 
 ### stop
 
-```text
+```
 Usage: cloudsqlctl stop [options]
 
 Stop the Cloud SQL Proxy or Service
@@ -130,7 +131,7 @@ Options:
 
 ### status
 
-```text
+```
 Usage: cloudsqlctl status [options]
 
 Check the status of the Cloud SQL Proxy and Service
@@ -141,7 +142,7 @@ Options:
 
 ### logs
 
-```text
+```
 Usage: cloudsqlctl logs [options]
 
 View the tail of the proxy logs
@@ -153,7 +154,7 @@ Options:
 
 ### doctor
 
-```text
+```
 Usage: cloudsqlctl doctor [options]
 
 Run diagnostics to verify environment setup
@@ -164,7 +165,7 @@ Options:
 
 ### reset
 
-```text
+```
 Usage: cloudsqlctl reset [options]
 
 Reset configuration and remove local files
@@ -176,7 +177,7 @@ Options:
 
 ### env
 
-```text
+```
 Usage: cloudsqlctl env [options] [command]
 
 Manage environment variables
@@ -191,7 +192,7 @@ Commands:
 
 ### service
 
-```text
+```
 Usage: cloudsqlctl service [options] [command]
 
 Manage the Cloud SQL Proxy Windows Service (Requires Admin)
@@ -211,7 +212,7 @@ Commands:
 
 ### ps1
 
-```text
+```
 Usage: cloudsqlctl ps1 [options] [command]
 
 Manage PowerShell scripts
@@ -226,7 +227,7 @@ Commands:
 
 ### repair
 
-```text
+```
 Usage: cloudsqlctl repair [options]
 
 Self-heal missing or corrupted files and configurations
@@ -237,7 +238,7 @@ Options:
 
 ### check
 
-```text
+```
 Usage: cloudsqlctl check [options]
 
 Verify full system configuration
@@ -249,7 +250,7 @@ Options:
 
 ### gcloud
 
-```text
+```
 Usage: cloudsqlctl gcloud [options] [command]
 
 Manage Google Cloud CLI
@@ -265,7 +266,7 @@ Commands:
 
 ### auth
 
-```text
+```
 Usage: cloudsqlctl auth [options] [command]
 
 Manage authentication and credentials
@@ -284,7 +285,7 @@ Commands:
 
 ### setup
 
-```text
+```
 Usage: cloudsqlctl setup [options]
 
 Interactive setup wizard
@@ -295,7 +296,7 @@ Options:
 
 ### paths
 
-```text
+```
 Usage: cloudsqlctl paths [options]
 
 Show resolved system paths and configuration locations
@@ -303,3 +304,25 @@ Show resolved system paths and configuration locations
 Options:
   -h, --help  display help for command
 ```
+
+### upgrade
+
+```
+Usage: cloudsqlctl upgrade [options]
+
+Upgrade cloudsqlctl to the latest version
+
+Options:
+  --check-only    Only check for updates, do not download or install
+  --no-install    Download only, do not install
+  --asset <mode>  Asset type to download (auto, installer, exe) (default:
+                  "auto")
+  --dir <path>    Download directory (default:
+                  "C:\\Users\\ymc\\AppData\\Local\\CloudSQLCTL\\downloads\\updates")
+  --force         Force update even if version is same or older
+  --no-silent     Run installer in interactive mode (installer only)
+  --no-elevate    Do not attempt to elevate privileges (installer only)
+  --json          Output status in JSON format
+  -h, --help      display help for command
+```
+
