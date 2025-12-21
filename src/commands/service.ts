@@ -9,9 +9,14 @@ serviceCommand.command('install')
     .description('Install the Windows Service')
     .requiredOption('-i, --instance <connectionName>', 'Instance connection name')
     .option('-p, --port <port>', 'Port number', '5432')
+    .option('-c, --credentials <path>', 'Path to service account JSON key')
     .action(async (options) => {
         try {
-            await installService(options.instance, parseInt(options.port), []);
+            const extraArgs = [];
+            if (options.credentials) {
+                extraArgs.push(`--credentials-file "${options.credentials}"`);
+            }
+            await installService(options.instance, parseInt(options.port), extraArgs);
             logger.info('Service installed successfully.');
         } catch (error) {
             logger.error('Failed to install service', error);
@@ -23,9 +28,14 @@ serviceCommand.command('configure')
     .description('Update Service Configuration')
     .requiredOption('-i, --instance <connectionName>', 'Instance connection name')
     .option('-p, --port <port>', 'Port number', '5432')
+    .option('-c, --credentials <path>', 'Path to service account JSON key')
     .action(async (options) => {
         try {
-            await updateServiceBinPath(options.instance, parseInt(options.port), []);
+            const extraArgs = [];
+            if (options.credentials) {
+                extraArgs.push(`--credentials-file "${options.credentials}"`);
+            }
+            await updateServiceBinPath(options.instance, parseInt(options.port), extraArgs);
             logger.info('Service configured successfully.');
         } catch (error) {
             logger.error('Failed to configure service', error);

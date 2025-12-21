@@ -6,6 +6,7 @@ import { SYSTEM_PATHS, USER_PATHS, ENV_VARS } from '../system/paths.js';
 import { runPs } from '../system/powershell.js';
 import fs from 'fs-extra';
 import path from 'path';
+import inquirer from 'inquirer';
 
 export const authCommand = new Command('auth')
     .description('Manage authentication and credentials');
@@ -68,8 +69,9 @@ authCommand.command('set-service-account')
     .description('Configure service account credentials')
     .requiredOption('-f, --file <path>', 'Path to service account JSON key')
     .option('-s, --scope <scope>', 'Scope (Machine or User)', 'User')
+    .option('--no-rename', 'Do not rename the file to service account name')
     .action(async (options) => {
-        const { file, scope } = options;
+        const { file, scope, rename } = options;
         if (!['Machine', 'User'].includes(scope)) {
             logger.error('Scope must be either Machine or User');
             process.exit(1);
@@ -81,10 +83,21 @@ authCommand.command('set-service-account')
                 process.exit(1);
             }
 
+            const keyData = await fs.readJson(file);
+            if (keyData.type !== 'service_account') {
+                logger.error('Invalid service account key file.');
+                process.exit(1);
+            }
+
             const paths = scope === 'Machine' ? SYSTEM_PATHS : USER_PATHS;
             await fs.ensureDir(paths.SECRETS);
 
-            const fileName = path.basename(file);
+            let fileName = path.basename(file);
+            if (rename && keyData.client_email) {
+                const saName = keyData.client_email.split('@')[0];
+                fileName = `${saName}.json`;
+            }
+
             const dest = path.join(paths.SECRETS, fileName);
 
             await fs.copy(file, dest, { overwrite: true });
@@ -105,3 +118,69 @@ authCommand.command('set-service-account')
             process.exit(1);
         }
     });
+
+authCommand.command('list-keys')
+    .description('List available service account keys')
+    .action(async () => {
+        try {
+            const userKeys = (await fs.pathExists(USER_PATHS.SECRETS)) ? await fs.readdir(USER_PATHS.SECRETS) : [];
+            const systemKeys = (await fs.pathExists(SYSTEM_PATHS.SECRETS)) ? await fs.readdir(SYSTEM_PATHS.SECRETS) : [];
+
+            logger.info('Available Service Account Keys:');
+
+            if (userKeys.length > 0) {
+                logger.info('\n  User Scope:');
+                userKeys.filter(f => f.endsWith('.json')).forEach(f => logger.info(`    - ${f}`));
+            }
+
+            if (systemKeys.length > 0) {
+                logger.info('\n  Machine Scope:');
+                systemKeys.filter(f => f.endsWith('.json')).forEach(f => logger.info(`    - ${f}`));
+            }
+
+            if (userKeys.length === 0 && systemKeys.length === 0) {
+                logger.info('  No keys found.');
+            }
+        } catch (error) {
+            logger.error('Failed to list keys', error);
+        }
+    });
+
+authCommand.command('select-key')
+    .description('Interactively select a service account key')
+    .option('-s, --scope <scope>', 'Scope (Machine or User)', 'User')
+    .action(async (options) => {
+        const { scope } = options;
+        const paths = scope === 'Machine' ? SYSTEM_PATHS : USER_PATHS;
+
+        try {
+            if (!await fs.pathExists(paths.SECRETS)) {
+                logger.error(`No keys found in ${scope} scope.`);
+                return;
+            }
+
+            const keys = (await fs.readdir(paths.SECRETS)).filter(f => f.endsWith('.json'));
+            if (keys.length === 0) {
+                logger.error(`No keys found in ${scope} scope.`);
+                return;
+            }
+
+            const { selectedKey } = await inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'selectedKey',
+                    message: `Select a service account key (${scope} scope):`,
+                    choices: keys
+                }
+            ]);
+
+            const fullPath = path.join(paths.SECRETS, selectedKey);
+            await setEnv(ENV_VARS.GOOGLE_CREDS, fullPath, scope);
+            logger.info(`Successfully selected ${selectedKey} and updated ${ENV_VARS.GOOGLE_CREDS}`);
+
+        } catch (error) {
+            logger.error('Failed to select key', error);
+            process.exit(1);
+        }
+    });
+

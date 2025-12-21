@@ -280,6 +280,8 @@ Commands:
   adc                            Setup Application Default Credentials
   project <projectId>            Set active project
   set-service-account [options]  Configure service account credentials
+  list-keys                      List available service account keys
+  select-key [options]           Interactively select a service account key
   help [command]                 display help for command
 ```
 
@@ -325,3 +327,4 @@ Options:
   --json          Output status in JSON format
   -h, --help      display help for command
 ```
+

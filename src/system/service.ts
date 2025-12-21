@@ -1,5 +1,5 @@
-import { runPs, isAdmin } from './powershell.js';
-import { SERVICE_NAME, SYSTEM_PATHS } from './paths.js';
+import { runPs, isAdmin, getEnvVar } from './powershell.js';
+import { SERVICE_NAME, SYSTEM_PATHS, ENV_VARS } from './paths.js';
 import { logger } from '../core/logger.js';
 
 export async function isServiceInstalled(): Promise<boolean> {
@@ -36,6 +36,22 @@ export async function installService(instance: string, port: number = 5432, extr
 
     logger.info(`Installing service ${SERVICE_NAME}...`);
 
+    // Auto-detect credentials if not provided in extraArgs
+    if (!extraArgs.some(arg => arg.includes('--credentials-file'))) {
+        const machineCreds = await getEnvVar(ENV_VARS.GOOGLE_CREDS, 'Machine');
+        if (machineCreds) {
+            logger.info(`Auto-detected machine-level credentials: ${machineCreds}`);
+            extraArgs.push(`--credentials-file "${machineCreds}"`);
+        } else {
+            const userCreds = await getEnvVar(ENV_VARS.GOOGLE_CREDS, 'User');
+            if (userCreds) {
+                logger.warn('Detected user-level credentials. Services running as LocalSystem may not be able to access them.');
+                logger.warn('Recommendation: Use "cloudsqlctl auth set-service-account --file <path> --scope Machine"');
+                extraArgs.push(`--credentials-file "${userCreds}"`);
+            }
+        }
+    }
+
     const binPath = buildServiceBinPath(SYSTEM_PATHS.PROXY_EXE, instance, port, extraArgs);
 
     // Use New-Service with single-quoted BinaryPathName
@@ -45,6 +61,14 @@ export async function installService(instance: string, port: number = 5432, extr
 export async function updateServiceBinPath(instance: string, port: number = 5432, extraArgs: string[] = []) {
     if (!await isAdmin()) {
         throw new Error('Admin privileges required to update service configuration.');
+    }
+
+    // Auto-detect credentials if not provided in extraArgs
+    if (!extraArgs.some(arg => arg.includes('--credentials-file'))) {
+        const machineCreds = await getEnvVar(ENV_VARS.GOOGLE_CREDS, 'Machine');
+        if (machineCreds) {
+            extraArgs.push(`--credentials-file "${machineCreds}"`);
+        }
     }
 
     const binPath = buildServiceBinPath(SYSTEM_PATHS.PROXY_EXE, instance, port, extraArgs);
