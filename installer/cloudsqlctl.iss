@@ -5,6 +5,7 @@
 #define MyAppPublisher "Kinin Code"
 #define MyAppURL "https://github.com/Kinin-Code-Offical/cloudsqlctl"
 #define MyAppExeName "cloudsqlctl.exe"
+#define MyAppIcon "..\assets\logo.ico"
 
 [Setup]
 AppId={{8A4B2C1D-E3F4-5678-9012-3456789ABCDE}
@@ -15,6 +16,9 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
+#ifexist MyAppIcon
+SetupIconFile={#MyAppIcon}
+#endif
 DisableProgramGroupPage=yes
 PrivilegesRequired=admin
 OutputDir=..\dist

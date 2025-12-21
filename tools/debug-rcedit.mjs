@@ -1,0 +1,4 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const rcedit = require('rcedit');
+console.log(rcedit);

@@ -40,4 +40,12 @@ npx postject dist/cloudsqlctl-base.exe NODE_SEA_BLOB dist/sea-prep.blob --sentin
 Write-Host "Finalizing..."
 Move-Item -Path "dist/cloudsqlctl-base.exe" -Destination "bin/cloudsqlctl.exe" -Force
 
+# 7. Set Icon (if available)
+Write-Host "Setting icon..."
+node tools/set-icon.mjs
+
+# 8. Sign Executable (Optional)
+Write-Host "Attempting to sign executable..."
+./tools/sign-exe.ps1
+
 Write-Host "Build complete: bin/cloudsqlctl.exe"
