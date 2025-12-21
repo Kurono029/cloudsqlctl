@@ -41,7 +41,7 @@ function Get-Sha256Hash {
         return [BitConverter]::ToString($hashBytes).Replace("-", "").ToLower()
     }
     catch {
-        Write-Error "Failed to calculate hash for ${FilePath}: $_"
+        Write-Error ("Failed to calculate hash for {0}: {1}" -f $FilePath, $_)
         exit 1
     }
 }
