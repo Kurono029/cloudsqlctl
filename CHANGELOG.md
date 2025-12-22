@@ -2,6 +2,25 @@
 
 # Changelog
 
+## [0.5.0] - 2025-12-22
+
+### Added
+
+- support bundle command (`cloudsqlctl support`)
+- upgrade channels/pinning/target version (`cloudsqlctl upgrade --channel/--pin/--version`)
+- npm publish pipeline and package files whitelist
+- distribution templates: Scoop bucket, Chocolatey skeleton, Winget template
+- enterprise policy.json guardrails for update/auth
+
+### Changed
+
+- deterministic proxy checksum verification from GCS `.sha256`
+- safer portable upgrade swap (temp + atomic replace + rollback)
+- service-aware proxy install/update coordination
+- GitHub Release workflow supports workflow_dispatch + republish (asset delete/replace)
+- ProgramData machine-scope ACL hardening (no Users write for service binaries)
+- repo hygiene: ignore build artifacts
+
 ## [0.4.17] - 2025-12-22
 
 ### Changed
