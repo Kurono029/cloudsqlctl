@@ -2,6 +2,15 @@
 
 # Changelog
 
+## [0.4.16] - 2025-12-22
+
+### Changed
+
+- add optional signing hooks to release workflow (skips if secrets not set)
+- add Scoop bucket + Chocolatey skeleton + Winget manifest template
+- add enterprise policy.json guardrails for upgrade/auth
+- make proxy install/update service-aware and use safe temp download + swap
+
 ## [0.4.15] - 2025-12-22
 
 ### Changed
